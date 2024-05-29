@@ -36,6 +36,7 @@ router.get('/countries', function (req, res, next) {
     }
 });
 
+// NOTE: Added filter by population distance
 router.get('/volcanoes', function (req, res, next) {
     const { country, sort = 'asc' } = req.query;
 
@@ -79,7 +80,6 @@ router.get('/volcanoes', function (req, res, next) {
 });
 
 router.get('/volcano/:id', function (req, res, next) {
-	// add Token error when users has been set up properly (401)
 	const allowedParams = ['sort'];
     const queryParams = Object.keys(req.query);
     
@@ -96,13 +96,23 @@ router.get('/volcano/:id', function (req, res, next) {
         	.select('*')
         	.where('id', '=', req.params.id)
         	.then((rows) => {
+                // Check if the volcano id is valid
             	if (rows.length === 0) {
                 	res.status(404).json({
                     	error: true,
-                    	message: 'Volcano with ID: ${volcanoId} not found.'
+                    	message: `Volcano with ID: ${req.params.id} not found.`
                 	});
             	} else {
-                	res.json(rows);
+                    // Check if token is present
+                    if (req.headers.authorization) {
+                        authorisation(req, res, () => {res.json(rows[0])});
+                    } else {
+                        const authorisationFilter = rows.map(row => {
+                            const { population_5km, population_10km, population_30km, population_100km, ...rest } = row;
+                            return rest;
+                        });
+                        res.json(authorisationFilter[0]);
+                    }
             	}
         	})
         	.catch((err) => {

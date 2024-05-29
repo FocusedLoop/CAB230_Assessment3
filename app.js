@@ -14,7 +14,7 @@ const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 
 const indexRouter = require('./routes/index');
-//const usersRouter = require('./routes/users');
+const usersRouter = require('./routes/users');
 //const knexRouter = require('./routes/knex'); 
 //const loginRouter = require('./routes/login');
 //const registerRouter = require('./routes/register');
@@ -47,7 +47,7 @@ app.use(logger('common'));
 app.use(cors());
 
 app.use('/', indexRouter);
-//app.use('/users', usersRouter);
+app.use('/user', usersRouter);
 //app.use('/me', apiRouter);
 
 
